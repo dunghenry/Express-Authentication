@@ -14,13 +14,13 @@ connect.on('disconnected', () => {
 connect.on('error', async (error) => {
     console.log(error.message);
     console.log("Connected MongoDB error..........");
-    await logEvents(error.message);
+    await logEvents(error.message, module.filename);
     process.exit(1);
 })
 connect.on('reconnectFailed', async (error) => {
     console.log(error.message);
     console.log("ReconnectFailed MongoDB..........");
-    await logEvents(error.message);
+    await logEvents(error.message, module.filename);
     process.exit(1);
 })
 process.on('SIGINT', async () => {

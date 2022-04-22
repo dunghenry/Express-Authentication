@@ -13,7 +13,8 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 const connectDB = require('./config/connectDB');
-// require('./config/connect');
+// require('./config/connect'); //test connectDB 
+require('./config/connectMultipleDB');
 const routes = require('./routes');
 const app = express();
 //app use package
@@ -24,14 +25,16 @@ app.use(morgan('combined'));
 app.use(helmet());
 //connectDB
 connectDB();
-
-//Use routes
+//Use routes and test
 // app.get("/", async (req, res) => {
-//    try {
+//     try {
+//         console.log(a);
 //        res.status(200).json({message: "Success!"});
-//    } catch (error) {
-       //Test logEvents errors
-//        await logEvents(error.message);
+//     } catch (error) {
+//         const txt = 'D:\\Express-Authentication\\express-auth\\'
+//         console.log(module.filename.slice(txt.length))
+    //    Test logEvents errors
+//        await logEvents(error.message, module.filename);
 //    }
 // })
 app.use('/api/v1', routes);

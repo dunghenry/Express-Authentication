@@ -14,19 +14,19 @@ function newConnection(uri) {
     connect.on('error', async (error) => {
         console.log(error.message);
         console.log("Connected MongoDB error..........");
-        await logEvents(error.message);
+        await logEvents(error.message, module.filename);
         process.exit(1);
     })
     connect.on('reconnectFailed', async (error) => {
         console.log(error.message);
         console.log("ReconnectFailed MongoDB..........");
-        await logEvents(error.message);
+        await logEvents(error.message, module.filename);
         process.exit(1);
     })
     return connect;
 }
 
-const connectDBOne = newConnection('mongodb://localhost:27017/test');
-const connectDBUser = newConnection('mongodb://localhost:27017/test2');
+const connectDBPost = newConnection(process.env.MONGODB_URI);
 
-module.exports = {connectDBOne, connectDBUser};
+// const connectDBUser = newConnection('mongodb://localhost:27017/test2');
+module.exports = connectDBPost;

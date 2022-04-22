@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const logEvents = require('../helpers/logEvents');
+var path = require('path');
 const connectDB = async () => {
     try {
        await mongoose.connect(process.env.MONGODB_URI, {
@@ -9,7 +10,7 @@ const connectDB = async () => {
        })
         console.log("Connected MongoDB successfully!!");
     } catch (error) {
-        await logEvents(error.message);
+        await logEvents(error.message, module.filename);
         console.log("Message error: " + error.message);
         console.log("Connected MongoDB failed!!");
         process.exit(0);
@@ -30,7 +31,7 @@ mongoose.connection.on('disconnected', () => {
 mongoose.connection.on('reconnectFailed', async (error) => {
     console.log(error.message);
     console.log("ReconnectFailed MongoDB..........");
-    await logEvents(error.message);
+    await logEvents(error.message, module.filename);
     process.exit(1);
 })
 mongoose.connection.on('reconnected', () => {
@@ -39,7 +40,7 @@ mongoose.connection.on('reconnected', () => {
 mongoose.connection.on('error', async (error) => {
     console.log(error.message);
     console.log("Connected MongoDB error..........");
-    await logEvents(error.message);
+    await logEvents(error.message, module.filename);
     process.exit(1);
 })
 process.on('SIGINT', async () => {
