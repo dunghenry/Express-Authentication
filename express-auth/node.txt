@@ -1,0 +1,20 @@
+const createError = require('http-errors');
+/Use middleware test error message
+app.use('/', (req, res, next) => {
+    C1: hardcode
+    const error = new Error('Not Found');
+    error.status = 500;
+    next(error);
+
+    C2:
+    next(createError(404, 'NOT FOUND'));
+
+    C3:
+    next(createError.NotFound("NOT FOUND"));
+})
+app.use('/', (error, req, res, next) => {
+    res.json({
+        status: error.status,
+        message: error.message
+    })
+})
