@@ -3,10 +3,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const createError = require('http-errors');
+const cookieParser = require("cookie-parser");
 dotenv.config();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const logEvents = require('./helpers/logEvents');
+const client = require('./config/connectRedis');
 const port = process.env.PORT || 4000;
 const corsOptions = {
     origin: '*',
@@ -23,6 +25,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(morgan('combined'));
 app.use(helmet());
+app.use(cookieParser());
 //connectDB
 connectDB();
 //Use routes and test
@@ -38,5 +41,15 @@ connectDB();
 //    }
 // })
 app.use('/api/v1', routes);
+
+//Test redis
+client.set('name', "Tran Van Dung");
+client.get('name', (err, name) => {
+    if (err) {
+        console.log(err);
+    }
+    console.log(name);
+})
+
 //app listen on port
 app.listen(port, () => console.log("App started on http://localhost:" + port));

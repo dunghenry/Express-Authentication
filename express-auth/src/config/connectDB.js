@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const logEvents = require('../helpers/logEvents');
 var path = require('path');
+require('./connectRedis');
 const connectDB = async () => {
     try {
        await mongoose.connect(process.env.MONGODB_URI, {
