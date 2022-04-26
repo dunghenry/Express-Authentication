@@ -2,6 +2,7 @@ const User = require('../models/User');
 const logEvents = require('../helpers/logEvents');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const client = require('../config/connectRedis');
 const { userValidation } = require('../helpers/validation');
 const { generateAccessToken, generateRefreshToken } = require('../helpers/jwt_services');
 const authController = {
@@ -36,7 +37,7 @@ const authController = {
         }
     },
     generateAccessToken: (user) => {
-        return jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60m' });
+        return jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' });
     },
     generateRefreshToken: (user) => {
         return jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '365d' });
@@ -55,13 +56,14 @@ const authController = {
             // const testAccessToken = await generateAccessToken(user._id);
             // const testRefreshToken = await generateRefreshToken(user._id)
             const refreshToken = authController.generateRefreshToken(user);
+            client.set(user._id.toString(), refreshToken, 'EX', 365 * 24 * 60 * 60);
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: false,
                 path: "/",
                 sameSite: "strict",
             });
-            if (user && passwordValid) return res.status(200).json({ ...infoUser, token});
+            if (user && passwordValid) return res.status(200).json({ ...infoUser, token });
         } catch (error) {
             await logEvents(error.message, module.filename);
             return res.status(500).json(error.message);
@@ -69,28 +71,35 @@ const authController = {
     },
     refreshToken: async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
-        // console.log(req.cookies.refreshToken)
-        if (!refreshToken || req.cookies.refreshToken === undefined) return res.status(401).json("You're not authenticated");
+        console.log(refreshToken)
+        if (!refreshToken) return res.status(401).json("You're not authenticated");
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
             if (err) {
                 console.error(err.message);
             }
             const user = {
-                '_id' : data.userId
+                '_id': data.userId
             }
+            client.get(user._id, (err, dt) => {
+                console.log("refreshToken" + dt);
+            });
+            
             const newAccessToken = authController.generateAccessToken(user);
-            const newRefreshToken = authController.generateRefreshToken(user)
+            const newRefreshToken = authController.generateRefreshToken(user);
+            client.set(user._id.toString(), newRefreshToken, 'EX', 365 * 24 * 60 * 60);
             res.cookie("refreshToken", newRefreshToken, {
                 httpOnly: true,
-                secure:false,
+                secure: false,
                 path: "/",
                 sameSite: "strict",
             });
-            return res.status(200).json({newAccessToken})
+            return res.status(200).json({ newAccessToken })
         })
     },
     logout: async (req, res) => {
         res.clearCookie("refreshToken");
+        console.log(req.userId);
+        client.del(req.userId);
         return res.status(200).json("Logged out successfully!");
     }
 }

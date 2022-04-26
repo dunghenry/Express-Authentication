@@ -21,8 +21,5 @@ const verifyToken = async (req, res, next) => {
         return res.status(401).json({ message: "Token not found!" });
     }
 }
-const verifyAccessToken = (req, res, next) => {
-    
-}
 
 module.exports = {verifyToken};

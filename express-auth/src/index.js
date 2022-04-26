@@ -43,13 +43,13 @@ connectDB();
 app.use('/api/v1', routes);
 
 //Test redis
-client.set('name', "Tran Van Dung");
-client.get('name', (err, name) => {
-    if (err) {
-        console.log(err);
-    }
-    console.log(name);
-})
+// client.set('name', "Tran Van Dung");
+// client.get('name', (err, name) => {
+//     if (err) {
+//         console.log(err);
+//     }
+//     console.log(name);
+// })
 
 //app listen on port
 app.listen(port, () => console.log("App started on http://localhost:" + port));
