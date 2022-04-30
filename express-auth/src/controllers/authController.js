@@ -75,6 +75,8 @@ const authController = {
         if (!refreshToken) return res.status(401).json("You're not authenticated");
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
             if (err) {
+                if (err.name === "TokenExpiredError")
+                    return res.status(401).json("Refresh token expired");
                 console.error(err.message);
             }
             const user = {
@@ -83,7 +85,6 @@ const authController = {
             client.get(user._id, (err, dt) => {
                 console.log("refreshToken" + dt);
             });
-            
             const newAccessToken = authController.generateAccessToken(user);
             const newRefreshToken = authController.generateRefreshToken(user);
             client.set(user._id.toString(), newRefreshToken, 'EX', 365 * 24 * 60 * 60);
